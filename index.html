@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Top Websites</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #1B1F23;
+        color: white;
+      }
+
+      #app {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 20px;
+        justify-items: center;
+        align-items: center;
+        margin: 30px;
+      }
+
+      a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 14px;
+        height: 120px;
+        width: 120px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        text-transform: capitalize;
+        color: ivory;
+        transition: transform 0.3s ease;
+      }
+
+      a:hover {
+        transform: translateY(-5px);
+      }
+
+      a img {
+        height: 80px;
+        width: 80px;
+        border-radius: 50%;
+        background-color: white;
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: center;
+        margin: 20px;
+      }
+
+      .pagination a {
+        margin: 0 5px;
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+      }
+
+      .go-to-page {
+        display: flex;
+        justify-content: center;
+        margin: 20px;
+      }
+
+      .go-to-page label,
+      .go-to-page input,
+      .go-to-page button {
+        font-size: 16px;
+        color: white;
+      }
+
+      .go-to-page label {
+        margin-right: 10px;
+      }
+
+      .go-to-page input {
+        width: 50px;
+        padding: 5px;
+        border-radius: 5px;
+        background-color: #2E3338;
+        border: none;
+      }
+
+      .go-to-page button {
+        padding: 5px 10px;
+        border-radius: 5px;
+        background-color: #4CAF50;
+        border: none;
+        cursor: pointer;
+      }
+
+      .go-to-page button:hover {
+        background-color: #45a049;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div class="pagination" id="pagination"></div>
+
+    <div class="go-to-page">
+      <label for="page-input">Go to page:</label>
+      <input type="number" id="page-input" min="1" max="1" value="1">
+      <button id="go-button">Go</button>
+    </div>
+
+    <script>
+      const itemsPerPage = 500; // Number of items to display per page
+      const maxVisiblePages = 5; // Maximum number of visible page links
+      const app = document.getElementById("app");
+      const pagination = document.getElementById("pagination");
+      const pageInput = document.getElementById("page-input");
+      const goButton = document.getElementById("go-button");
+
+      let websites = [];
+
+      fetch("websitez.txt")
+        .then((response) => response.text())
+        .then((text) => {
+          websites = text.split("\n");
+          const totalPages = Math.ceil(websites.length / itemsPerPage);
+          let currentPage = 1;
+
+          function displayWebsites() {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const websitesToDisplay = websites.slice(startIndex, endIndex);
+
+            app.innerHTML = "";
+
+            websitesToDisplay.forEach((website) => {
+              if (website) {
+                const link = document.createElement("a");
+                link.href = "https://" + website;
+                link.target = "_blank";
+                const name = website.split(".")[0];
+                link.innerHTML = `<img src="https://icons.duckduckgo.com/ip3/${website}.ico" alt="${name}" loading="lazy">${name}`;
+                app.appendChild(link);
+              }
+            });
+          }
+
+          function displayPagination() {
+            pagination.innerHTML = "";
+
+            const startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+            if (startPage > 1) {
+              const prevLink = createPaginationLink("Prev", currentPage - 1);
+              pagination.appendChild(prevLink);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+              const pageLink = createPaginationLink(i, i === currentPage);
+              pagination.appendChild(pageLink);
+            }
+
+            if (endPage < totalPages) {
+              const nextLink = createPaginationLink("Next", currentPage + 1);
+              pagination.appendChild(nextLink);
+            }
+
+            const lastLink = createPaginationLink(totalPages, currentPage === totalPages);
+            pagination.appendChild(lastLink);
+          }
+
+          function createPaginationLink(label, page) {
+            const link = document.createElement("a");
+            link.href = "#";
+            link.textContent = label;
+
+            if (typeof page === "number") {
+              link.addEventListener("click", () => {
+                currentPage = page;
+                displayWebsites();
+                displayPagination();
+              });
+            }
+
+            return link;
+          }
+
+          function goToPage() {
+            const pageNumber = parseInt(pageInput.value);
+
+            if (pageNumber && pageNumber >= 1 && pageNumber <= totalPages) {
+              currentPage = pageNumber;
+              displayWebsites();
+              displayPagination();
+            } else {
+              pageInput.value = currentPage;
+            }
+          }
+
+          goButton.addEventListener("click", goToPage);
+
+          displayWebsites();
+          displayPagination();
+        });
+    </script>
+  </body>
+</html>
