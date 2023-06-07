@@ -9,17 +9,24 @@
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
-        background-color: #1B1F23;
+        background-color: #141414;
         color: white;
+        overflow-x: hidden;
+      }
+
+      h1 {
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 50px;
       }
 
       #app {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: auto;
         justify-items: center;
         align-items: center;
-        margin: 30px;
+        margin-bottom: 50px;
       }
 
       a {
@@ -27,102 +34,84 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        text-align: center;
         text-decoration: none;
-        font-size: 14px;
-        height: 120px;
-        width: 120px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        font-size: 28px;
+        height: 190px;
+        width: 190px;
+        margin-bottom: 100px;
         text-transform: capitalize;
         color: ivory;
-        transition: transform 0.3s ease;
-      }
-
-      a:hover {
-        transform: translateY(-5px);
       }
 
       a img {
-        height: 80px;
-        width: 80px;
-        border-radius: 50%;
+        margin-bottom: 10px;
+        height: 180px;
+        width: 180px;
+        border-radius: 20%;
         background-color: white;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
       }
 
       .pagination {
         display: flex;
         justify-content: center;
-        margin: 20px;
+        margin-top: 20px;
+        margin-bottom: 20px;
       }
 
       .pagination a {
-        margin: 0 5px;
+        margin: 0 25px;
         color: white;
         text-decoration: none;
-        font-size: 16px;
-      }
-
-      .go-to-page {
-        display: flex;
-        justify-content: center;
-        margin: 20px;
-      }
-
-      .go-to-page label,
-      .go-to-page input,
-      .go-to-page button {
-        font-size: 16px;
-        color: white;
-      }
-
-      .go-to-page label {
-        margin-right: 10px;
-      }
-
-      .go-to-page input {
         width: 50px;
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+        border-radius: 50%;
+        background-color: #262626;
+      }
+
+      .pagination a:hover {
+        background-color: #404040;
+      }
+
+      .pagination a.active {
+        font-weight: bold;
+        background-color: #808080;
+      }
+
+      .pagination input {
+        margin: 0 20px;
         padding: 5px;
-        border-radius: 5px;
-        background-color: #2E3338;
-        border: none;
+        width: 50px;
+        
       }
 
-      .go-to-page button {
+      .pagination button {
+        margin: 0 20px;
         padding: 5px 10px;
-        border-radius: 5px;
-        background-color: #4CAF50;
-        border: none;
-        cursor: pointer;
-      }
-
-      .go-to-page button:hover {
-        background-color: #45a049;
       }
     </style>
   </head>
   <body>
+    <h1></h1>
     <div id="app"></div>
     <div class="pagination" id="pagination"></div>
 
-    <div class="go-to-page">
-      <label for="page-input">Go to page:</label>
-      <input type="number" id="page-input" min="1" max="1" value="1">
-      <button id="go-button">Go</button>
-    </div>
-
     <script>
-      const itemsPerPage = 500; // Number of items to display per page
+      const itemsPerPage = 250; // Number of items to display per page
       const maxVisiblePages = 5; // Maximum number of visible page links
       const app = document.getElementById("app");
       const pagination = document.getElementById("pagination");
-      const pageInput = document.getElementById("page-input");
-      const goButton = document.getElementById("go-button");
-
-      let websites = [];
+      const totalPagesElement = document.createElement("span");
+      totalPagesElement.style.margin = "0 10px";
+      pagination.appendChild(totalPagesElement);
 
       fetch("websitez.txt")
         .then((response) => response.text())
         .then((text) => {
-          websites = text.split("\n");
+          const websites = text.split("\n");
           const totalPages = Math.ceil(websites.length / itemsPerPage);
           let currentPage = 1;
 
@@ -139,7 +128,7 @@
                 link.href = "https://" + website;
                 link.target = "_blank";
                 const name = website.split(".")[0];
-                link.innerHTML = `<img src="https://icons.duckduckgo.com/ip3/${website}.ico" alt="${name}" loading="lazy">${name}`;
+                link.innerHTML = `<img src="https://www.google.com/s2/favicons?sz=180&domain=${website}" alt="${name}" loading="lazy">${name}`;
                 app.appendChild(link);
               }
             });
@@ -152,53 +141,68 @@
             const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
             if (startPage > 1) {
-              const prevLink = createPaginationLink("Prev", currentPage - 1);
+              const prevLink = document.createElement("a");
+              prevLink.href = "#";
+              prevLink.textContent = "Prev";
+              prevLink.addEventListener("click", () => {
+                currentPage = currentPage - 1;
+                displayWebsites();
+                displayPagination();
+              });
               pagination.appendChild(prevLink);
             }
 
             for (let i = startPage; i <= endPage; i++) {
-              const pageLink = createPaginationLink(i, i === currentPage);
+              const pageLink = document.createElement("a");
+              pageLink.href = "#";
+              pageLink.textContent = i;
+
+              if (i === currentPage) {
+                pageLink.classList.add("active");
+              }
+
+              pageLink.addEventListener("click", () => {
+                currentPage = i;
+                displayWebsites();
+                displayPagination();
+              });
+
               pagination.appendChild(pageLink);
             }
 
             if (endPage < totalPages) {
-              const nextLink = createPaginationLink("Next", currentPage + 1);
-              pagination.appendChild(nextLink);
-            }
-
-            const lastLink = createPaginationLink(totalPages, currentPage === totalPages);
-            pagination.appendChild(lastLink);
-          }
-
-          function createPaginationLink(label, page) {
-            const link = document.createElement("a");
-            link.href = "#";
-            link.textContent = label;
-
-            if (typeof page === "number") {
-              link.addEventListener("click", () => {
-                currentPage = page;
+              const nextLink = document.createElement("a");
+              nextLink.href = "#";
+              nextLink.textContent = "Next";
+              nextLink.addEventListener("click", () => {
+                currentPage = currentPage + 1;
                 displayWebsites();
                 displayPagination();
               });
+              pagination.appendChild(nextLink);
             }
 
-            return link;
+            totalPagesElement.textContent = `of ${totalPages}`;
+
+            const goToPageInput = document.createElement("input");
+            goToPageInput.type = "number";
+            goToPageInput.min = 1;
+            goToPageInput.max = totalPages;
+            goToPageInput.value = currentPage;
+            pagination.appendChild(goToPageInput);
+
+            const goToPageButton = document.createElement("button");
+            goToPageButton.textContent = "Go";
+            goToPageButton.addEventListener("click", () => {
+              const page = parseInt(goToPageInput.value, 10);
+              if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                displayWebsites();
+                displayPagination();
+              }
+            });
+            pagination.appendChild(goToPageButton);
           }
-
-          function goToPage() {
-            const pageNumber = parseInt(pageInput.value);
-
-            if (pageNumber && pageNumber >= 1 && pageNumber <= totalPages) {
-              currentPage = pageNumber;
-              displayWebsites();
-              displayPagination();
-            } else {
-              pageInput.value = currentPage;
-            }
-          }
-
-          goButton.addEventListener("click", goToPage);
 
           displayWebsites();
           displayPagination();
