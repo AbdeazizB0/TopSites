@@ -85,28 +85,33 @@
         margin: 0 20px;
         padding: 5px;
         width: 50px;
-        
       }
 
       .pagination button {
         margin: 0 20px;
         padding: 5px 10px;
       }
+
+      .pagination span {
+        margin: 0 10px;
+      }
     </style>
   </head>
   <body>
     <h1></h1>
     <div id="app"></div>
-    <div class="pagination" id="pagination"></div>
+    <div class="pagination" id="pagination">
+      <span id="currentPageElement"></span>
+      <span id="totalPagesElement"></span>
+    </div>
 
     <script>
-      const itemsPerPage = 500; // Number of items to display per page
+      const itemsPerPage = 1000; // Number of items to display per page
       const maxVisiblePages = 5; // Maximum number of visible page links
       const app = document.getElementById("app");
       const pagination = document.getElementById("pagination");
-      const totalPagesElement = document.createElement("span");
-      totalPagesElement.style.margin = "0 10px";
-      pagination.appendChild(totalPagesElement);
+      const currentPageElement = document.getElementById("currentPageElement");
+      const totalPagesElement = document.getElementById("totalPagesElement");
 
       fetch("websitez.txt")
         .then((response) => response.text())
@@ -182,6 +187,7 @@
               pagination.appendChild(nextLink);
             }
 
+            currentPageElement.textContent = `Page ${currentPage}`;
             totalPagesElement.textContent = `of ${totalPages}`;
 
             const goToPageInput = document.createElement("input");
